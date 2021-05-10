@@ -3,3 +3,12 @@
 ################################################################################
 
 /.vs
+/Debug
+/x64/Debug
+/MP-2021-JPRO-PROJECT.sln
+/MP-2021-JPRO-PROJECT.vcxproj
+/MP-2021-JPRO-PROJECT.vcxproj.filters
+/MP-2021-JPRO-PROJECT.vcxproj.user
+frame*.bmp
+/a.out
+*.gif
