@@ -4,8 +4,8 @@
 #include "turtle.h"
 
 #define _CRT_SECURE_NO_WARNINGS
-#define ROW_LENGTH 80
-#define MAX_VALUE_LENGTH 60
+#define ROW_LENGTH 220
+#define MAX_VALUE_LENGTH 200
 
 typedef struct Field 
 {
@@ -29,17 +29,17 @@ typedef struct PositionListNode
 
 /* Zwalnianie pamiêci                                                        */
 void free_mem(IntList*, IntList*, PositionList*, Field**, int);
-/* Generuje obraz */
+/* Generuje obraz na podstawie stanu uk³adu                                  */
 void draw_frame(Field**, int, int);
-/* Wypisanie aktualnego stanu planszy                                        */
+/* Wypisanie aktualnego stanu uk³adu                                         */
 void print_board(FILE* output, Field**, int);
-/* Nadpisanie aktualnych stanów komórek nastêpnymi i wyzerowanie nastêpnych  */
+/* Nadpisanie aktualnych stanów komórek nastêpnymi i zerowanie nastêpnych    */
 void apply_next_state(Field**, int);
 /* Przygotowanie nastêpnych stanów komórek                                   */
 void prepare_next_state(Field**, int, IntList*, IntList*);
 /* Aktywowanie komórek zawartych w liœcie                                    */
 void init_state(Field**, int, PositionList*);
-/* Alokowanie pamiêci dla planszy                                            */
+/* Alokowanie pamiêci dla uk³adu                                             */
 Field** init_board(int);
 /* Wczytanie danych z pliku konfiguracyjnego                                 */
 void load_config(IntList*, IntList*, PositionList*, int*, int*, int*, int*);
@@ -53,7 +53,8 @@ int main()
 	IntList* surviveConditions = calloc(sizeof(IntList), 1);
 	PositionList* initPositions = calloc(sizeof(PositionList),1);
 
-	load_config(bornConditions, surviveConditions, initPositions, &iter, &fieldSize, &boardSize, &outputMode);
+	load_config(bornConditions, surviveConditions, initPositions, &iter, 
+		&fieldSize, &boardSize, &outputMode);
 	board = init_board(boardSize);
 
 	init_state(board, boardSize, initPositions);
@@ -89,7 +90,8 @@ int main()
 	}
 	
 	fclose(output);
-	free_mem(bornConditions, surviveConditions, initPositions, board, boardSize);
+	free_mem(bornConditions, surviveConditions, 
+		initPositions, board, boardSize);
 	return 0;
 }
 
@@ -115,12 +117,11 @@ void add_position_to_list(PositionList* list, int column, int row)
 		list->next->row = row;
 	}
 }
-int read_config(char* fields[])
+void read_config(char* configFields[])
 {
 	FILE* config = NULL;
 	config = fopen("config", "r");
 	char buff[ROW_LENGTH] = { '\0' };
-	char subbuff[MAX_VALUE_LENGTH] = { '\0' };
 	int oindex = 0;
 	int i;
 
@@ -134,17 +135,19 @@ int read_config(char* fields[])
 	{
 		if (buff[0] != '#')
 		{
+			//pêtla szuka indeksu znaku '=' w linijce
 			for (i = 0; buff[i] != '=' && i < ROW_LENGTH; i++);
 
-			strncpy(subbuff, buff + i + 1, strlen(buff) - i - 1);
-			strcpy(fields[oindex++], subbuff);
+			//kopiowanie tego co po '=' do zmiennej przekazanej w tablicy jako argument
+			strncpy(configFields[oindex++], buff + i + 1, strlen(buff) - i - 1);
 		}
 	}
 
 	fclose(config);
-	return 1;
 }
-void load_config(IntList* born, IntList* survive, PositionList* initPositions, int* iter, int* fieldSize, int* size, int* outputMode)
+void load_config(IntList* bornConditions, IntList* surviveConditions, 
+	PositionList* initPositions, int* iter, int* fieldSize, int* size,
+	int* outputMode)
 {
 	char chr, neastChr;
 	int i = -1, j = -1, k = -1, row = -1, column = -1;
@@ -157,11 +160,14 @@ void load_config(IntList* born, IntList* survive, PositionList* initPositions, i
 	char initStr[MAX_VALUE_LENGTH] = { '\0' };
 	char outputModeStr[MAX_VALUE_LENGTH] = { '\0' };
 
-	char* config[7] = { bornStr, surviveStr, iterStr, fieldSizeStr, sizeStr, outputModeStr, initStr };
+	char* config[7] = { bornStr, surviveStr, iterStr, 
+		fieldSizeStr, sizeStr, outputModeStr, initStr };
+
+	//wartoœci dla pierwszych elementów list
 	initPositions->row = -1;
 	initPositions->column = -1;
-	born->value = -1;
-	survive->value = -1;
+	bornConditions->value = -1;
+	surviveConditions->value = -1;
 	
 	read_config(config);
 
@@ -170,26 +176,25 @@ void load_config(IntList* born, IntList* survive, PositionList* initPositions, i
 	*iter = atoi(iterStr);
 	*outputMode = atoi(outputModeStr);
 	
+	//wpisywanie wartoœci z pola bornConditions do listy
 	while ((chr = bornStr[++i]) != '\0')
 		if (chr != ',' && chr != '\n')
 		{
 			k = chr - '0';
-			add_int_to_list(born, k);
+			add_int_to_list(bornConditions, k);
 		}
-			
-
 	i = -1;
 
+	//wpisywanie wartoœci z pola surviveConditions do listy
 	while ((chr = surviveStr[++i]) != '\0')
 		if (chr != ',' && chr != '\n')
 		{
 			k = chr - '0';
-			add_int_to_list(survive, k);
+			add_int_to_list(surviveConditions, k);
 		}
-			
-
 	i = -1;
 
+	//wpisywanie wartoœci z pola init do listy pozycji komórek aktywnych
 	while ((chr = initStr[++i]) != '\0')
 	{
 		j = i - 1;
@@ -238,7 +243,7 @@ int position_list_contain(PositionList* list, int column, int row)
 void init_state(Field** board, int boardSize, PositionList* positions)
 {
 	int i, j;
-
+	//aktywuje komórki zawarte liœcie
 	for (i = 0; i < boardSize; i++)
 		for (j = 0; j < boardSize; j++)
 			if (position_list_contain(positions, i, j))
@@ -262,10 +267,11 @@ int modulo(int val, int mod)
 		return mod + val;
 	return val % mod;
 }
-int count_neighbour(Field** board, int boardSize, int currentColumn, int currentRow)
+int count_neighbour(Field** board, int boardSize, 
+	int currentColumn, int currentRow)
 {
 	int i, j, columnAdr, rowAdr, output = 0;
-
+	//zlicza aktywne komórki s¹siaduj¹ce
 	for (i = -1; i <= 1; i++)
 		for (j = -1; j <= 1; j++)
 		{
@@ -281,24 +287,31 @@ int count_neighbour(Field** board, int boardSize, int currentColumn, int current
 
 	return output;
 }
-void prepare_next_state(Field** board, int boardSize, IntList* born, IntList* survive)
+void prepare_next_state(Field** board, int boardSize,
+	IntList* born, IntList* survive)
 {
 	int i, j;
-
+	//na podstawie list decyduje o nastêpnym stanie komórki
 	for (i = 0; i < boardSize; i++)
 		for (j = 0; j < boardSize; j++)
 		{
 			if ((*(board + j) + i)->current == 1)
 			{
-				if (!int_list_contain(survive, count_neighbour(board, boardSize, j, i)))
+				if (!int_list_contain(survive,
+					count_neighbour(board, boardSize, j, i)))
+				{
 					(*(board + j) + i)->next = 0;
+				}
 				else
 					(*(board + j) + i)->next = 1;
 			}
 			else
 			{
-				if (int_list_contain(born, count_neighbour(board, boardSize, j, i)))
+				if (int_list_contain(born, count_neighbour(board,
+					boardSize, j, i)))
+				{
 					(*(board + j) + i)->next = 1;
+				}
 			}
 		}
 }
@@ -330,6 +343,7 @@ void print_board(FILE* output, Field** board, int boardSize)
 		
 }
 
+/* Draw frame */
 void draw_sqr(int size)
 {
 	int i;

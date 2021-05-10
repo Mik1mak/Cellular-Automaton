@@ -11,4 +11,5 @@
 /MP-2021-JPRO-PROJECT.vcxproj.user
 frame*.bmp
 /a.out
-*.gif
+output.gif
+/x64/Release
