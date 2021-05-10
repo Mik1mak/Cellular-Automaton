@@ -57,7 +57,7 @@ Przy użyciu programu imagemagick możemy utworzyć gif
 ```
 convert -scale 800% -delay 10 -loop 0 frame*.bmp example1.gif
 ```
-[wygenerowany gif](example1.gif)
+![wygenerowany gif](example1.gif)
 
 ## Wykorzystane biblioteki
 [turtle.h](https://w3.cs.jmu.edu/lam2mo/cs240_2015_08/turtle.html)
@@ -70,7 +70,7 @@ gcc -c turtle.c -o turtle.o -lm
 gcc -Wall -Wextra core.c turtle.o -lm
 ```
 ### Visual Studio
-1. Sklonuj repozytorium np. poprzez wklejenie URL
+1. Sklonuj repozytorium
 2. Przejdź do
 	- File
 	- New
