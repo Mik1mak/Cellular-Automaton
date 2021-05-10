@@ -5,7 +5,7 @@ Celem jest badanie zachowań automatu komórkowego — układu
 składającego się z czworokątnych komórek ułożonych w siatkę.
 Zakładamy, że każda z komórek przyjmuje stan aktywny bądź nieaktywny i zmienia 
 go w zależności od wartości [komórek sąsiednich](https://pl.wikipedia.org/wiki/Sąsiedztwo_Moore’a).
-Ponadto przyjmujemy [periodyczny warunek brzegowy](https://pl.wikipedia.org/wiki/Automat_komórkowy#Periodyczne_(przenikające) — komórki na krawędzi układu
+Ponadto przyjmujemy [periodyczny warunek brzegowy](https://pl.wikipedia.org/wiki/Automat_komórkowy#Periodyczne_(przenikające)) — komórki na krawędzi układu
 jako swoich sąsiadów będą traktować pola z drugiej strony.
 
 ## Rozwiązanie problemu
@@ -64,13 +64,13 @@ A tak prezentuje się efekt:
 [turtle.h](https://w3.cs.jmu.edu/lam2mo/cs240_2015_08/turtle.html)
 
 ## Instrukcja kompilacji
-###Ubuntu
+### Ubuntu
 Aby skompilować program należy użyć tych komend w folderze repozytorium.
 ```
 gcc -c turtle.c -o turtle.o -lm
 gcc -Wall -Wextra core.c turtle.o -lm
 ```
-###Visual Studio
+### Visual Studio
 1. Sklonuj repozytorium np. poprzez wklejenie linku url
 2. Przejdź do
 	- File
